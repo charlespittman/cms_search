@@ -2,20 +2,6 @@ import pyodbc
 import argparse
 import json
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--clocks', nargs='+')
-args = parser.parse_args()
-
-with open('config.json') as config:
-    config = json.load(config)
-
-cnxn = pyodbc.connect(driver=config['driver'],
-                      server=config['server'],
-                      uid=config['user'],
-                      pwd=config['password'],
-                      database=config['database'])
-cursor = cnxn.cursor()
-
 class CMS:
     def __init__(self, row):
         self.clockid = '{}.{}.{}'.format(row.Eid, row.Fid, row.Cid)
@@ -100,6 +86,18 @@ class CMS:
             ]
         print(','.join(out))
 
+def setup_db():
+    # Connect to DB and return a cursor
+
+    with open('config.json') as config:
+        config = json.load(config)
+
+    cnxn = pyodbc.connect(driver=config['driver'],
+                          server=config['server'],
+                          uid=config['user'],
+                          pwd=config['password'],
+                          database=config['database'])
+    return cnxn.cursor()
 
 def convert_clock_id(cid):
     return cid[:-2], cid[-2:]
@@ -108,14 +106,23 @@ def convert_clock_id(cid):
 def search_cmsdb(cursor, clock_id):
     # Takes a DB cursor and str representing a clock id and returns a
     # cursor with the results of that search.
+
     hosp_id, clock_id = convert_clock_id(clock_id)
     sql = 'SELECT * FROM dbo.VLConnect WHERE fid={} AND cid={}'.format(hosp_id, clock_id)
     return cursor.execute(sql)
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--clocks', nargs='+')
+    args = parser.parse_args()
 
-if __name__ == '__main__':
+    cursor = setup_db()
+
     if args.clocks:
         for clock in args.clocks:
             for row in search_cmsdb(cursor, clock):
                 cms = CMS(row)
                 print(cms, '\n')
+
+if __name__ == '__main__':
+    main()

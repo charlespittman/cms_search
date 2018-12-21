@@ -22,9 +22,9 @@ class CMS:
         self.clockid = '{}.{}.{}'.format(row.Eid, row.Fid, row.Cid)
         self.maintserv = row.MaintServ
         self.maintport = row.MaintPort
-        self.enterprisename = row.EnterpriseName
-        self.facility = row.FacilityName
-        self.clockname = row.ClockName
+        self.enterprisename = self.clean_col(row.EnterpriseName)
+        self.facility = self.clean_col(row.FacilityName)
+        self.clockname = self.clean_col(row.ClockName)
         self.lastonline = row.LastTime
         self.model = row.ActiveModel
         self.os = row.ActiveOS
@@ -37,7 +37,7 @@ class CMS:
         self.bdb = row.BDBQty
         self.macaddress = row.ActiveMacAddress
         self.clocktime = row.ActiveClockTime
-        self.serialnumber = row.SerialNumber
+        self.serialnumber = self.clean_col(row.SerialNumber)
         self.pendingupdate = row.PendingUpdateInd
         self.lastupdate = row.LastUpdateDate
         self.updatesuccess = row.UpdateSuccessInd
@@ -78,11 +78,15 @@ class CMS:
             'restrictedupdate={}'.format(self.restrictedupdate),
             'serialnumber={}'.format(self.serialnumber),
             'setcodes={}'.format(self.setcodes),
-            'updateresults={}'.format(self.updateresults),
-            'updatesuccess={}'.format(self.updatesuccess),
-            'vlcid={}'.format(self.vlcid),
-            'vlctail={}'.format(self.vlctail)]
+            #'updateresults={}'.format(self.updateresults),
+            #'updatesuccess={}'.format(self.updatesuccess),
+            #'vlcid={}'.format(self.vlcid),
+            #'vlctail={}'.format(self.vlctail)
+        ]
         return ','.join(out)
+
+    def clean_col(self, col):
+        return col.strip()
 
     def print_short(self):
         out = [
@@ -106,4 +110,4 @@ if __name__ == '__main__':
     res = cursor.execute(sql)
     for r in res:
         cms = CMS(r)
-        cms.print_short()
+        print(cms)

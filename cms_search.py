@@ -3,7 +3,7 @@ import argparse
 import json
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--clock', nargs=1)
+parser.add_argument('-c', '--clocks', nargs='+')
 args = parser.parse_args()
 
 with open('config.json') as config:
@@ -13,8 +13,7 @@ cnxn = pyodbc.connect(driver=config['driver'],
                       server=config['server'],
                       uid=config['user'],
                       pwd=config['password'],
-                      database=config['database'],
-                      autocommit=True)
+                      database=config['database'])
 cursor = cnxn.cursor()
 
 class CMS:
@@ -101,13 +100,22 @@ class CMS:
             ]
         print(','.join(out))
 
+
 def convert_clock_id(cid):
     return cid[:-2], cid[-2:]
 
-if __name__ == '__main__':
-    hosp_id, clock_id = convert_clock_id(args.clock[0])
+
+def search_cmsdb(cursor, clock_id):
+    # Takes a DB cursor and str representing a clock id and returns a
+    # cursor with the results of that search.
+    hosp_id, clock_id = convert_clock_id(clock_id)
     sql = 'SELECT * FROM dbo.VLConnect WHERE fid={} AND cid={}'.format(hosp_id, clock_id)
-    res = cursor.execute(sql)
-    for r in res:
-        cms = CMS(r)
-        print(cms)
+    return cursor.execute(sql)
+
+
+if __name__ == '__main__':
+    if args.clocks:
+        for clock in args.clocks:
+            for row in search_cmsdb(cursor, clock):
+                cms = CMS(row)
+                print(cms, '\n')

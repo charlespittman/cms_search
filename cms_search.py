@@ -9,7 +9,7 @@ args = parser.parse_args()
 with open('config.json') as config:
     config = json.load(config)
 
-cnxn = pyodbc.connect('Driver={ODBC Driver 17 for SQL Server};',
+cnxn = pyodbc.connect(driver=config['driver'],
                       server=config['server'],
                       uid=config['user'],
                       pwd=config['password'],
@@ -102,7 +102,6 @@ def convert_clock_id(cid):
 
 if __name__ == '__main__':
     hosp_id, clock_id = convert_clock_id(args.clock[0])
-    print(hosp_id, clock_id)
     sql = 'SELECT * FROM dbo.VLConnect WHERE fid={} AND cid={}'.format(hosp_id, clock_id)
     res = cursor.execute(sql)
     for r in res:

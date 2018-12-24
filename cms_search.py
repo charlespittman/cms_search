@@ -73,6 +73,13 @@ class CMS:
         return ','.join(out)
 
     def clean_col(self, col):
+        col = str(col)
+        replace_dict = {'&amp;' : '&',
+                        '&lt;' : '<',
+                        '&gt;' : '>'}
+
+        for k, v in replace_dict.items():
+            col = col.replace(k,v)
         return col.strip()
 
     def print_short(self):
@@ -105,12 +112,15 @@ def convert_clock_id(cid):
     return cid[:-2], cid[-2:]
 
 
-def search_cmsdb(cursor, clock_id):
+def search_cmsdb(cursor, clock_id=None):
     # Takes a DB cursor and str representing a clock id and returns a
     # cursor with the results of that search.
 
-    hosp_id, clock_id = convert_clock_id(clock_id)
-    sql = 'SELECT * FROM dbo.VLConnect WHERE fid={} AND cid={}'.format(hosp_id, clock_id)
+    if clock_id:
+        hosp_id, clock_id = convert_clock_id(clock_id)
+        sql = 'SELECT * FROM dbo.VLConnect WHERE fid={} AND cid={}'.format(hosp_id, clock_id)
+    else:
+        sql = 'SELECT * FROM dbo.VLConnect'
     return cursor.execute(sql)
 
 def main():
@@ -125,6 +135,10 @@ def main():
             for row in search_cmsdb(cursor, clock):
                 cms = CMS(row)
                 print(cms, '\n')
+    else:
+        for row in search_cmsdb(cursor):
+            cms = CMS(row)
+            print(cms, '\n')
 
 if __name__ == '__main__':
     main()

@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import pyodbc
 import argparse
 import json

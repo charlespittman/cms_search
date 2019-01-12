@@ -73,11 +73,13 @@ class CMS:
         return ','.join(out)
 
     def clean_col(self, col):
-        html_replacements = {'&amp;' : '&',
-                             '&lt;' : '<',
-                             '&gt;' : '>'}
-        for k, d in html_replacements.items():
-            col = str(col).replace(k, d)
+        col = str(col)
+        replace_dict = {'&amp;' : '&',
+                        '&lt;' : '<',
+                        '&gt;' : '>'}
+
+        for k, v in replace_dict.items():
+            col = col.replace(k,v)
         return col.strip()
 
     def print_short(self):
@@ -118,6 +120,7 @@ def search_cmsdb(cursor, clock_id=None):
     if clock_id:
         sql += ' WHERE fid={} AND cid={}'.format(hosp_id, clock_id)
         hosp_id, clock_id = convert_clock_id(clock_id)
+
     return cursor.execute(sql)
 
 def main():

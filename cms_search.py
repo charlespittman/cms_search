@@ -118,8 +118,8 @@ def search_cmsdb(cursor, clock_id=None):
 
     sql = 'SELECT * FROM dbo.VLConnect '
     if clock_id:
-        sql += ' WHERE fid={} AND cid={}'.format(hosp_id, clock_id)
         hosp_id, clock_id = convert_clock_id(clock_id)
+        sql += ' WHERE fid={} AND cid={}'.format(hosp_id, clock_id)
 
     return cursor.execute(sql)
 
